@@ -1,0 +1,72 @@
+body{
+    margin: 0 0 0 0;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Header CSS */
+.header-container {
+    background-color: gray;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 20vw;
+    padding-left: 1rem;
+    overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.header-title{
+    font-size: 3rem;
+}
+
+.header-break{
+    border-bottom: 1px;
+    border-color: black;
+    border-style: solid;
+    width: 20vw;
+    margin-left: -1rem;
+    padding-right: calc(1rem - 2px);
+}
+
+/* Filter CSS */
+.filter-name {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    align-items: center;
+    cursor: pointer;
+}
+
+.filter-content {
+    padding-left: 2rem;
+    height: 25vh;
+    overflow-y: scroll;
+}
+
+.filter-box {
+    margin-bottom: 10px;
+}
+
+.filter-content-buttons{
+    justify-content: right;
+    margin-right: 2vw;
+}
+
+#cancer-type-content {
+    margin-bottom: 10px;
+}
+
+#year-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 2fr 1fr 2fr;
+    align-items: center;
+    justify-items: left;
+}
+
+#age-group-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 2fr;
+    align-items: center;
+    justify-items: left;
+}
+/* Dual Range Slider for Year filer */

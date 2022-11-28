@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="./js/script.js" defer></script>
+    <title>Final Project</title>
+</head>
+<body>
+    <header class="header-container">
+        
+        <h1 class="header-title">Analyzing<br />Cancer<br />Data</h1>
+        <hr class="header-break" />
+
+      
+        <section class="filter-container">
+            <h1>Filters:</h1>
+            <div class="filter-box">
+                <div class="filter-name" onclick='document.getElementById("cancer-type-arrow").classList.toggle("fa-chevron-down"); toggleFilterContent("cancer-type-content")'>
+                    <h2>Cancer Type</h2>
+                    <i id='cancer-type-arrow' class="fa fa-chevron-right" style="font-size:36px"></i>
+                </div>
+                <form name="cancer-type-checkboxes" onsubmit="onSubmitCancerType(event);" action="#">
+                    <div id="cancer-type-content" class="filter-content" style="display: none;">
+                        <input type="checkbox" name="cancer-type" value="All" checked>All</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Oral Cavity and Pharynx">Oral Cavity and Pharynx</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Digestive System">Digestive System</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Respiratory System">Respiratory System</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Bones and Joints">Bones and Joints</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Soft Tissue including Heart">Soft Tissue including Heart</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Skin excluding Basal and Squamous">Skin excluding Basal and Squamous</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Male and Female Breast">Male and Female Breast</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Female Genital System">Female Genital System</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Male Genital System">Male Genital System</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Urinary System">Urinary System</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Eye and Orbit">Eye and Orbit</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Brain and Other Nervous System">Brain and Other Nervous System</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Lymphomas">Lymphomas</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Myeloma">Myeloma</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Leukemias">Leukemias</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Mesothelioma">Mesothelioma</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Kaposi Sarcoma">Kaposi Sarcoma</input> <br />
+                        <input type="checkbox" name="cancer-type" value="Miscellaneous">Miscellaneous</input> <br />
+                    </div>
+                    <span id="cancer-type-content-buttons" class="filter-content-buttons" style="display: none;">
+                        <button type="reset" onclick="resetCancerTypes()">Reset</button>
+                        <input type="submit" value="Apply" />
+                    </span>
+                </form>
+            </div>
+            <div class="filter-box">
+                <div class="filter-name" onclick='document.getElementById("age-group-arrow").classList.toggle("fa-chevron-down"); toggleFilterContent("age-group-content")'>
+                    <h2>Age Group</h2>
+                    <i id='age-group-arrow' class="fa fa-chevron-right" style="font-size:36px"></i>
+                </div>
+                <form name="age-group-checkboxes" onsubmit="onSubmitAgeGroup(event);" action="#">
+                    <div id="age-group-content" class="filter-content" style="display: none;">
+                        <input type="checkbox" name="age-group" value="All" checked> All</input> <br />
+                        <input type="checkbox" name="age-group" value="<1 year"> &lt;1 year</input> <br />
+                        <input type="checkbox" name="age-group" value="1-4 years"> 1-4 years</input> <br />
+                        <input type="checkbox" name="age-group" value="4-9 years"> 4-9 years</input> <br />
+                        <input type="checkbox" name="age-group" value="10-14 years">10-14 years</input> <br />
+                        <input type="checkbox" name="age-group" value="15-19 years">15-19 years</input> <br />
+                        <input type="checkbox" name="age-group" value="20-24 years">20-24 years</input> <br />
+                        <input type="checkbox" name="age-group" value="25-29 years">25-29 years</input> <br />
+                        <input type="checkbox" name="age-group" value="30-34 years">30-34 years</input> <br />
+                        <input type="checkbox" name="age-group" value="35-39 years">35-39 years</input> <br />
+                        <input type="checkbox" name="age-group" value="40-44 years">40-44 years</input> <br />
+                        <input type="checkbox" name="age-group" value="44-49 years">44-49 years</input> <br />
+                        <input type="checkbox" name="age-group" value="50-54 years">50-54 years</input> <br />
+                        <input type="checkbox" name="age-group" value="54-59 years">54-59 years</input> <br />
+                        <input type="checkbox" name="age-group" value="60-64 years">60-64 years</input> <br />
+                        <input type="checkbox" name="age-group" value="64-69 years">64-69 years</input> <br />
+                        <input type="checkbox" name="age-group" value="70-74 years">70-74 years</input> <br />
+                        <input type="checkbox" name="age-group" value="74-79 years">74-79 years</input> <br />
+                        <input type="checkbox" name="age-group" value=">80 years"> &gt;80 years</input> <br />
+                    </div>
+                    <span id="age-group-content-buttons" class="filter-content-buttons" style="display: none;">
+                        <button type="reset" onclick="resetAgeGroups()">Reset</button>
+                        <input type="submit" value="Apply" />
+                    </span>
+                </form>
+            </div>
+            <div class="filter-box">
+                <div class="filter-name" onclick='document.getElementById("year-arrow").classList.toggle("fa-chevron-down"); toggleFilterContent("year-content")'>
+                    <h2>Year</h2>
+                    <i id='year-arrow' class="fa fa-chevron-right" style="font-size:36px"></i>
+                </div>
+            </div>
+            <form name="year-checkboxes" onsubmit="onSubmitYear(event);" action="#">
+                <div id="year-content" class="filter-content" style="display: none;">
+                    <input type="checkbox" name="year" value="All" checked> All</input> <br />
+                    <input type="checkbox" name="year" value="2018">2018</input> <br />
+                    <input type="checkbox" name="year" value="2017">2017</input> <br />
+                    <input type="checkbox" name="year" value="2016">2016</input> <br />
+                    <input type="checkbox" name="year" value="2015">2015</input> <br />
+                    <input type="checkbox" name="year" value="2014">2014</input> <br />
+                    <input type="checkbox" name="year" value="2013">2013</input> <br />
+                    <input type="checkbox" name="year" value="2012">2012</input> <br />
+                    <input type="checkbox" name="year" value="2011">2011</input> <br />
+                    <input type="checkbox" name="year" value="2010">2010</input> <br />
+                    <input type="checkbox" name="year" value="2009">2009</input> <br />
+                    <input type="checkbox" name="year" value="2008">2008</input> <br />
+                    <input type="checkbox" name="year" value="2007">2007</input> <br />
+                    <input type="checkbox" name="year" value="2006">2006</input> <br />
+                    <input type="checkbox" name="year" value="2005">2005</input> <br />
+                    <input type="checkbox" name="year" value="2004">2004</input> <br />
+                    <input type="checkbox" name="year" value="2003">2003</input> <br />
+                    <input type="checkbox" name="year" value="2002">2002</input> <br />
+                    <input type="checkbox" name="year" value="2001">2001</input> <br />
+                    <input type="checkbox" name="year" value="2000">2000</input> <br />
+                    <input type="checkbox" name="year" value="1999">1999</input> <br />
+                </div>
+                <span id="year-content-buttons" class="filter-content-buttons" style="display: none;">
+                    <button type="reset" onclick="resetYears()">Reset</button>
+                    <input type="submit" value="Apply" />
+                </span>
+            </form>
+        </section>
+
+        
+    </header>
+</body>
+</html>
