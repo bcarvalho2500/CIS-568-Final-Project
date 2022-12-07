@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="./js/script.js" defer></script>
+    <script src="./js/script.js"></script>
+    <script src="./lib/d3.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
     <title>Final Project</title>
 </head>
 <body>
@@ -119,8 +121,33 @@
                 </span>
             </form>
         </section>
-
         
     </header>
+
+    <div id = 'map-container'>
+		<div id="tooltip"></div>
+
+            <script>
+
+                // Dimension of the page
+                const window_dims = {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                };
+                const margin = window_dims.width * .05;
+
+                // Append an SVG element to body, then append a path for the boundaries
+                let svg = d3.select('#map-container').append("svg")
+                    .attr("viewBox",`0 0 ${window_dims.width} ${window_dims.height}`)
+                    .attr("width", "60vw")
+                    .attr("height", "100%")
+
+                // Render the map
+                renderMap(window_dims, margin, svg);
+
+            </script>
+
+    </div>
+
 </body>
 </html>

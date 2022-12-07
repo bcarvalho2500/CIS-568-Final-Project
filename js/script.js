@@ -41,6 +41,7 @@ function onSubmitCancerType(event) {
 			}
 		})
 	console.log(cancerTypesSelected)
+	renderMap(window_dims, margin, svg);
 }
 
 function resetCancerTypes() {
@@ -58,10 +59,11 @@ function onSubmitAgeGroup(event) {
 			}
 		})
 	console.log(ageGroupSelected)
+	renderMap(window_dims, margin, svg);
 }
 
 function resetAgeGroups() {
-	ageGroupsSelected = []
+	ageGroupSelected = []
 }
 
 function onSubmitYear(event) {
@@ -75,8 +77,216 @@ function onSubmitYear(event) {
 			}
 		})
 	console.log(yearsSelected)
+	renderMap(window_dims, margin, svg);
 }
 
 function resetYears() {
 	yearsSelected = []
 }
+
+// Function to draw and update map
+
+function renderMap(window_dims, margin, svg){
+
+
+	/*-------------------------------------------------------*/
+	/*------------------- Window setting --------------------*/
+	/*-------------------------------------------------------*/
+	// Dimension of the page
+	//const window_dims = {
+	//	width: window.innerWidth/5 * 4,
+	//	height: window.innerHeight/2
+	//};
+	//const margin = window_dims.width * .05
+
+	//console.log(window_dims);
+
+
+	/*-------------------------------------------------------*/
+	/*-----------------parallel load Data--------------------*/
+	/*-------------------------------------------------------*/
+
+	// A topojson file containing spatial coordinates for US states
+	const US_States = "../Data/gz_2010_us_040_00_20m.topojson"
+	// Cancer incidence Data in each state, by year, by age group
+	const Cancer_Data = "../Data/Cancer_Data.csv"
+
+
+	// open both files
+	Promise.all([
+		d3.json(US_States),
+		d3.csv(Cancer_Data)
+	]).then(data => {
+		// topology Data
+
+		// Store CSV Data in cancer
+		//let cancer = data[1];
+
+
+		/*-------------------------------------------------------*/
+		/*-----------------Topojson Data handling----------------*/
+		/*-------------------------------------------------------*/
+
+
+
+		const topo_data = data[0].objects.gz_2010_us_040_00_20m;
+
+		const geojson = topojson.feature(data[0], topo_data);
+
+		//console.log(geojson.features);
+
+		// Filter CSV cancer_data
+		let test_Data = d3.group((data[1].filter(d=>{
+			if(yearsSelected.includes(d.Year)){
+				return true
+			}
+			else if(yearsSelected.includes("All")){
+				return true
+			}
+		})
+			.filter(d=> {
+				if(ageGroupSelected.includes(d.Age_Groups)){
+					return true
+				}
+				else if(ageGroupSelected.includes("All")){
+					return true
+				}
+			})
+			.filter(d=> {
+				if(cancerTypesSelected.includes(d.Cancer_Sites)){
+					return true
+				}
+				else if(cancerTypesSelected.includes("All")){
+					return true
+				}
+			})), d=>d.GEOID);
+
+		//console.log([...test_Data]);
+
+		//console.log([...test_Data]);
+
+		const aggregation = [...test_Data].map(d=>
+		{
+			let sum = 0;
+			const geoId = d[0]
+
+			d[1].forEach(dd =>
+			{
+				sum = sum + Number(dd['Count'])
+			})
+
+			//console.log(sum)
+
+			return ({'GEOID':geoId, 'States': d[1][0]['States'], 'Count': sum })
+			})
+console.log(aggregation)
+
+		const mapData = d3.group(aggregation, d=>d.GEOID)
+
+		//console.log(mapData);
+		//console.log(mapData.get("0400000US06")[0].Count);
+
+
+
+
+		//console.log(test_Data.get("0400000US06"));
+		//console.log(test_Data);
+		//console.log([...test_Data]);
+		//console.log(d3.extent([...test_Data], d=>Number(d[1][0].Count)));
+		//console.log(typeof d3.extent([...test_Data], d=>d[1][0].Count)[0]);
+
+
+
+		/*-------------------------------------------------------*/
+		/*----------------geoPath generator----------------------*/
+		/*-------------------------------------------------------*/
+
+
+		const geoPath_generator = d3.geoPath()
+			.projection(d3.geoAlbers().
+			fitSize([window_dims.width - margin, window_dims.height - margin], geojson))
+
+
+
+		/*-------------------------------------------------------*/
+		/*----------------------Color Scaling--------------------*/
+		/*-------------------------------------------------------*/
+
+		// Color scale
+		var colorInterpolator = d3.interpolateRgbBasis(["white", "red"])
+
+		// Value scale for filtered Data, to be colored by color scale
+		let linearScaleCount = d3.scaleLinear()
+			.domain(d3.extent(mapData, d=>d[1][0].Count))
+
+
+		/*--------------------------------------------------------*/
+		/*----------------- channelling marks --------------------*/
+		/*--------------------------------------------------------*/
+
+		// Append an SVG element to body, then append a path for the boundaries
+		//let svg = d3.select('#map-container').append("svg")
+		//	.attr("viewBox",`0 0 ${window_dims.width} ${window_dims.height}`)
+		//	.attr("width", "60vw")
+		//	.attr("height", "100%")
+
+
+		svg.selectAll(".map").remove();
+		svg.selectAll("path")
+			.attr('class', 'map')
+			.data(geojson.features)
+			.enter()
+			.append("path")
+			.attr("d", d =>
+				{
+					return geoPath_generator(d)
+				}
+			)
+			.attr("fill","white")
+			.on("mousemove", (mouseData,d)=>{
+				let state
+				let count
+
+				try {
+					state = mapData.get(d.properties.GEO_ID)[0].States
+					count = mapData.get(d.properties.GEO_ID)[0].Count
+				} catch (error) {
+					state = 'No Data Available'
+					count = 'No Data Available'
+				}
+				
+				d3.select('#tooltip')
+					.style("opacity",.8)
+					.style("left",(mouseData.clientX+10).toString()+"px")
+					.style("top",(mouseData.clientY+10).toString()+"px")
+					.html(
+						"<div class='tooltipData'>State: "+state+"</div>" +
+						"<div class='tooltipData'>Count: "+count+"</div>" +
+						"<div class='tooltipData'></div>")
+			})
+			.transition()
+			.delay((_,i)=>i*2)
+			.duration(800)
+			.style("fill", (d) => {
+				try{
+					// If a state has Data
+					return colorInterpolator(linearScaleCount(mapData.get(d.properties.GEO_ID)[0].Count));
+				}
+				catch (error)
+				{
+					// In case a state has no Data
+					return "orange";
+
+					// Silverblue, steelblue, white
+				}
+			})
+
+//style='color:red'
+
+
+
+	})
+}
+
+
+

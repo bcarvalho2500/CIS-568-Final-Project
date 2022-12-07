@@ -2,6 +2,7 @@ body{
     margin: 0 0 0 0;
     height: 100vh;
     width: 100vw;
+    display: flex;
 }
 
 /* Header CSS */
@@ -70,3 +71,38 @@ body{
     justify-items: left;
 }
 /* Dual Range Slider for Year filer */
+
+/* Map CSS Stuff */
+#map-container{
+    display: flex;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+path {
+    stroke-width: .5px;
+    stroke: black
+}
+
+path:hover {
+    opacity: .6;
+    stroke: orange;
+    fill: blue;
+    stroke-width: 4px;
+}
+
+#tooltip{
+    opacity: 0;
+    background-color: blue;
+    position: absolute;
+    width: 150px;
+    height: 60px;
+}
+
+.tooltipData{
+    font-family: sans-serif;
+    font-size: small;
+    color: antiquewhite;
+}
