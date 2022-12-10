@@ -295,25 +295,25 @@ function renderTimeSeries(){
 			console.log((filteredData));
 			console.log([...filteredData]);
 
+			let stateData = new Array();
+
 			// Aggregate data based on year, and group by geoid
-			 [...filteredData].slice(-1).forEach(d=>{
-				console.log([...d[1]]);
+			 [...filteredData].forEach(d=>{
+				console.log(d);
 
 				const geoId = d[0];
+				
+				d[1].forEach((element, idx) => {
+					let sum = 0
+					element.forEach( obj => {
+						sum += parseInt(obj.Count)
 
-				const temp = [...d[1]].map(dd=>{
-					let sum = 0;
-					const year = dd[0];
-
-					dd[1].forEach(ddd =>
-					{
-						sum = sum + Number(ddd['Count'])
 					})
-
-
-
-					return ({'GEOID':geoId, 'States': d[1][0]['States'], 'Count': sum , 'Year': year});
+					stateData.push({ geoid: geoId, Count: sum, year: idx })
 				})
+				
+				console.log(stateData)
+				console.log(stateData.filter((d) => d.geoid === '0400000US38'))
 			})
 
 			const aggregatedData = [...filteredData].map(d=>
