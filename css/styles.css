@@ -87,22 +87,39 @@ path {
 }
 
 path:hover {
-    opacity: .6;
+    opacity: 1;
     stroke: orange;
-    fill: blue;
     stroke-width: 4px;
 }
 
 #tooltip{
     opacity: 0;
-    background-color: blue;
+    background-color: black;
     position: absolute;
     width: 150px;
-    height: 60px;
+    height: 40px;
 }
 
 .tooltipData{
     font-family: sans-serif;
     font-size: small;
     color: antiquewhite;
+}
+
+/* Time Series CSS Stuff */
+#tooltipTS {
+    position: absolute;
+    opacity: 0;
+    background: lightskyblue;
+    height: 300px;
+    width: 300px;
+}
+.count{
+    stroke-width: 2px;
+    stroke: orange;
+    fill: none;
+}
+.axis text{
+    font-family: sans-serif;
+    font-weight: bold;
 }

@@ -123,9 +123,9 @@
         </section>
         
     </header>
-
+    <div id="tooltip"></div>
+    <div id="tooltipTS"></div>
     <div id = 'map-container'>
-		<div id="tooltip"></div>
 
             <script>
 
@@ -136,15 +136,21 @@
                 };
                 const margin = window_dims.width * .05;
 
+
                 // Append an SVG element to body, then append a path for the boundaries
                 let svg = d3.select('#map-container').append("svg")
                     .attr("viewBox",`0 0 ${window_dims.width} ${window_dims.height}`)
-                    .attr("width", "60vw")
+                    .attr("width", "80vw")
                     .attr("height", "100%")
 
                 // Render the map
                 renderMap(window_dims, margin, svg);
-				renderTimeSeries()
+
+                /*-------------------------------------*/
+                /*Rendering the Time Series Graph -----*/
+                /*-------------------------------------*/
+
+
 
             </script>
 

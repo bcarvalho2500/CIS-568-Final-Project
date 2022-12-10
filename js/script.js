@@ -104,10 +104,53 @@ function renderMap(window_dims, margin, svg){
 		d3.json(US_States),
 		d3.csv(Cancer_Data)
 	]).then(data => {
-		// topology Data
 
-		// Store CSV Data in cancer
-		//let cancer = data[1];
+		/*---------------------------------------------*/
+		/* --- Data Filtering for Time Series Graph ---*/
+		/*---------------------------------------------*/
+
+		// Filter and group CSV cancer_data
+		let filteredData = d3.group((data[1].filter(d=> {
+			if(ageGroupSelected.includes(d.Age_Groups)){
+				return true
+			}
+			else if(ageGroupSelected.includes("All")){
+				return true
+			}
+		})
+			.filter(d=> {
+				if(cancerTypesSelected.includes(d.Cancer_Sites)){
+					return true
+				}
+				else if(cancerTypesSelected.includes("All")){
+					return true
+				}
+			})), d=>d.GEOID, d=>d.Year);
+
+		//console.log((filteredData));
+		//console.log([...filteredData]);
+
+		// Aggregate data based on year, and group by geoid
+		let stateData = [];
+
+		[...filteredData].forEach(d=>{
+
+			const geoId = d[0];
+
+			d[1].forEach((element, idx) => {
+				let sum = 0
+				let States = ''
+				element.forEach( obj => {
+					sum += Number(obj.Count)
+					States = obj.States
+
+				})
+				stateData.push({ geoId: geoId, States: States, Count: sum, Year: new Date(idx) })
+			})
+
+		})
+		// Group the data by GeoID
+		const timeSeriesData = d3.group(stateData, d => d.geoId)
 
 
 		/*-------------------------------------------------------*/
@@ -122,7 +165,7 @@ function renderMap(window_dims, margin, svg){
 
 		//console.log(geojson.features);
 
-		// Filter CSV cancer_data
+		// Filter CSV cancer_data for map
 		let test_Data = d3.group((data[1].filter(d=>{
 			if(yearsSelected.includes(d.Year)){
 				return true
@@ -148,10 +191,6 @@ function renderMap(window_dims, margin, svg){
 				}
 			})), d=>d.GEOID);
 
-		//console.log([...test_Data]);
-
-		console.log([...test_Data]);
-
 		const aggregation = [...test_Data].map(d=>
 		{
 			let sum = 0;
@@ -166,7 +205,6 @@ function renderMap(window_dims, margin, svg){
 
 			return ({'GEOID':geoId, 'States': d[1][0]['States'], 'Count': sum })
 			})
-		console.log(aggregation)
 
 		const mapData = d3.group(aggregation, d=>d.GEOID)
 
@@ -200,15 +238,25 @@ function renderMap(window_dims, margin, svg){
 
 
 		/*--------------------------------------------------------*/
-		/*----------------- channelling marks --------------------*/
+		/*-------- Tooltip Creation & Svg for Time Series --------*/
 		/*--------------------------------------------------------*/
 
-		// Append an SVG element to body, then append a path for the boundaries
-		//let svg = d3.select('#map-container').append("svg")
-		//	.attr("viewBox",`0 0 ${window_dims.width} ${window_dims.height}`)
-		//	.attr("width", "60vw")
-		//	.attr("height", "100%")
+		const tooltip = d3.select('#tooltip');
+		const tooltipTS = d3.select('#tooltipTS');
 
+		// Create a time series svg for the time series graph
+		const dimsTS = {
+			width: 300,
+			height: 300
+		}
+
+		let svgTS = d3.select('#tooltipTS').append('svg');
+		svgTS.attr("viewBox", `0 0 ${dimsTS.width} ${dimsTS.height}`);
+
+
+		/*--------------------------------------------------------*/
+		/*----------------- channelling marks --------------------*/
+		/*--------------------------------------------------------*/
 
 		svg.selectAll(".map").remove();
 		svg.selectAll("path")
@@ -223,7 +271,7 @@ function renderMap(window_dims, margin, svg){
 			)
 			.attr("fill","white")
 			.attr("stroke", "black")
-			.on("mousemove", (mouseData,d)=>{
+			.on("click", (mouseData,d)=>{
 				let state
 				let count
 
@@ -235,15 +283,33 @@ function renderMap(window_dims, margin, svg){
 					count = 'No Data Available'
 				}
 
-				d3.select('#tooltip')
-					.style("opacity",.8)
-					.style("left",(mouseData.clientX+10).toString()+"px")
+					tooltip
+						.style("opacity",.8)
+						.style("left",(mouseData.clientX-200).toString()+"px")
+						.style("top",(mouseData.clientY-30).toString()+"px")
+						.html(
+							"<div class='tooltipData'>State: "+state+"</div>" +
+							"<div class='tooltipData'>Selection Count: "+count+"</div>" +
+							"<div class='tooltipData'></div>");
+
+				// Render the time series graph
+				tooltipTS
+					.style("left",(mouseData.clientX-200).toString()+"px")
 					.style("top",(mouseData.clientY+10).toString()+"px")
-					.html(
-						"<div class='tooltipData'>State: "+state+"</div>" +
-						"<div class='tooltipData'>Count: "+count+"</div>" +
-						"<div class='tooltipData'></div>")
+					.style("opacity", .90);
+				renderTimeSeries(svgTS, dimsTS, timeSeriesData.get(d.properties.GEO_ID)
+					.sort(function(a, b){
+					return a.Year-b.Year
+				}));
+
 			})
+			.on('dblclick', (mouseData,d)=>{
+				tooltip.transition()
+					.duration(1000)
+					.style("opacity", 0);
+			tooltipTS.transition()
+				.duration(1000)
+				.style("opacity", 0);})
 			.transition()
 			.delay((_,i)=>i*2)
 			.duration(1800)
@@ -258,94 +324,92 @@ function renderMap(window_dims, margin, svg){
 					return "steelblue";
 
 					// Silverblue, steelblue, white
+
 				}
 			})
-
-//style='color:red'
-
-
 
 	})
 }
 
 
-function renderTimeSeries(){
+function renderTimeSeries(svgTS, dimsTS, stateData){
 
-	const Cancer_Data = "../Data/Cancer_Data.csv"
-	d3.csv(Cancer_Data).then(
-		data => {
-			// Filter and group CSV cancer_data
-			let filteredData = d3.group((data.filter(d=> {
-					if(ageGroupSelected.includes(d.Age_Groups)){
-						return true
-					}
-					else if(ageGroupSelected.includes("All")){
-						return true
-					}
-				})
-				.filter(d=> {
-					if(cancerTypesSelected.includes(d.Cancer_Sites)){
-						return true
-					}
-					else if(cancerTypesSelected.includes("All")){
-						return true
-					}
-				})), d=>d.GEOID, d=>d.Year);
+	svgTS.selectAll("*").remove();
 
-			console.log((filteredData));
-			console.log([...filteredData]);
+			/*----------------------------------------------*/
+			/* Acquire extents for the variables of interest*/
+			/*----------------------------------------------*/
 
-			let stateData = new Array();
+			let yearExtent = d3.extent(stateData, d=>d.Year);
+			let countExtent = d3.extent(stateData, d=>d.Count);
 
-			// Aggregate data based on year, and group by geoid
-			 [...filteredData].forEach(d=>{
-				console.log(d);
+			//console.log(yearExtent);
+			//console.log(countExtent);
+			//console.log(stateData);
+			//console.log(dimsTS);
 
-				const geoId = d[0];
-				
-				d[1].forEach((element, idx) => {
-					let sum = 0
-					element.forEach( obj => {
-						sum += parseInt(obj.Count)
+			// Create the scale for Year
+			const xScale = d3.scaleTime()
+				.domain(yearExtent)
+				.range([50, dimsTS.width-10]);
 
-					})
-					stateData.push({ geoid: geoId, Count: sum, year: idx })
-				})
-				
-				console.log(stateData)
-				console.log(stateData.filter((d) => d.geoid === '0400000US38'))
-			})
-
-			const aggregatedData = [...filteredData].map(d=>
-			{
-				let sum = 0;
-				const geoId = d[0];
-
-				d[1].forEach(dd =>
-				{
-					sum = sum + Number(dd['Count'])
-				})
-
-				//console.log(sum)
-
-				return ({'GEOID':geoId, 'States': d[1][0]['States'], 'Count': sum })
-			})
+			// Create a scale for Count
+			const yScale = d3.scaleLinear()
+				.domain(countExtent)
+				.range([dimsTS.height-30, 10]);
 
 
+			/*----------------------------------------------*/
+			/* Create Axis Generators ----------------------*/
+			/*----------------------------------------------*/
+
+			// Adding axis generator for x and y axes
+			const xAxis = d3.axisBottom().scale(xScale);
+			const yAxis = d3.axisLeft().scale(yScale);
+
+			/*----------------------------------------------*/
+			/* Append the Axes to the SVG ------------------*/
+			/*----------------------------------------------*/
+
+			// Append the x axis
+			svgTS.append('g').attr("class", 'axis')
+				.attr('transform', `translate(0, ${dimsTS.height - 30})`)
+				.call(xAxis);
+
+			// Append the first y axis
+			svgTS.append('g').attr("class", 'axis')
+				.attr('transform', `translate(${50}, 0)`)
+				.call(yAxis);
 
 
+			/*----------------------------------------------*/
+			/* Create Line Generators ----------------------*/
+			/*----------------------------------------------*/
+
+			// Line generator for CO2
+			const LineGeneratorCount = d3.line()
+				.x(d=>xScale(d.Year))
+				.y(d=>yScale(d.Count));
 
 
-			//console.log(aggregatedData)
+			/*----------------------------------------------*/
+			/* Use the Line Generators ---------------------*/
+			/*----------------------------------------------*/
 
-			const timeSeriesData = d3.group(aggregatedData, d=>d.GEOID);
+			// Line for CO2
 
-			//console.log(timeSeriesData);
+			const lineCount = svgTS.append('g').attr('class', 'count');
+			lineCount.selectAll('count')
+				.attr('class', 'timeSeries')
+				.data([stateData])
+				.enter()
+				.append('path')
+				.attr('d', d => LineGeneratorCount(d));
 
 
-		}
-	)
 }
+
+
 
 
 
