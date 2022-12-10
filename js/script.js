@@ -41,7 +41,7 @@ function onSubmitCancerType(event) {
 			}
 		})
 	console.log(cancerTypesSelected)
-	renderMap(window_dims, margin, svg);
+	renderMap(window_dims, margin, svg, svgTS);
 }
 
 function resetCancerTypes() {
@@ -59,7 +59,7 @@ function onSubmitAgeGroup(event) {
 			}
 		})
 	console.log(ageGroupSelected)
-	renderMap(window_dims, margin, svg);
+	renderMap(window_dims, margin, svg, svgTS);
 }
 
 function resetAgeGroups() {
@@ -77,7 +77,7 @@ function onSubmitYear(event) {
 			}
 		})
 	console.log(yearsSelected)
-	renderMap(window_dims, margin, svg);
+	renderMap(window_dims, margin, svg, svgTS);
 }
 
 function resetYears() {
@@ -86,7 +86,7 @@ function resetYears() {
 
 // Function to draw and update map
 
-function renderMap(window_dims, margin, svg){
+function renderMap(window_dims, margin, svg, svgTS){
 
 
 	/*-------------------------------------------------------*/
@@ -244,21 +244,13 @@ function renderMap(window_dims, margin, svg){
 		const tooltip = d3.select('#tooltip');
 		const tooltipTS = d3.select('#tooltipTS');
 
-		// Create a time series svg for the time series graph
-		const dimsTS = {
-			width: 300,
-			height: 300
-		}
-
-		let svgTS = d3.select('#tooltipTS').append('svg');
-		svgTS.attr("viewBox", `0 0 ${dimsTS.width} ${dimsTS.height}`);
-
 
 		/*--------------------------------------------------------*/
 		/*----------------- channelling marks --------------------*/
 		/*--------------------------------------------------------*/
 
 		svg.selectAll(".map").remove();
+		svgTS.selectAll('*').remove()
 		svg.selectAll("path")
 			.attr('class', 'map')
 			.data(geojson.features)
@@ -334,7 +326,7 @@ function renderMap(window_dims, margin, svg){
 
 function renderTimeSeries(svgTS, dimsTS, stateData){
 
-	svgTS.selectAll("*").remove();
+			svgTS.selectAll("*").remove();
 
 			/*----------------------------------------------*/
 			/* Acquire extents for the variables of interest*/

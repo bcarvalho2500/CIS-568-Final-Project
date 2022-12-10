@@ -143,8 +143,16 @@
                     .attr("width", "80vw")
                     .attr("height", "100%")
 
+				const dimsTS = {
+					width: 300,
+					height: 300
+				}
+
+				let svgTS = d3.select('#tooltipTS').append('svg');
+				svgTS.attr("viewBox", `0 0 ${dimsTS.width} ${dimsTS.height}`);
+
                 // Render the map
-                renderMap(window_dims, margin, svg);
+                renderMap(window_dims, margin, svg, svgTS);
 
                 /*-------------------------------------*/
                 /*Rendering the Time Series Graph -----*/
