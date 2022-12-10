@@ -90,19 +90,6 @@ function renderMap(window_dims, margin, svg){
 
 
 	/*-------------------------------------------------------*/
-	/*------------------- Window setting --------------------*/
-	/*-------------------------------------------------------*/
-	// Dimension of the page
-	//const window_dims = {
-	//	width: window.innerWidth/5 * 4,
-	//	height: window.innerHeight/2
-	//};
-	//const margin = window_dims.width * .05
-
-	//console.log(window_dims);
-
-
-	/*-------------------------------------------------------*/
 	/*-----------------parallel load Data--------------------*/
 	/*-------------------------------------------------------*/
 
@@ -163,7 +150,7 @@ function renderMap(window_dims, margin, svg){
 
 		//console.log([...test_Data]);
 
-		//console.log([...test_Data]);
+		console.log([...test_Data]);
 
 		const aggregation = [...test_Data].map(d=>
 		{
@@ -179,21 +166,12 @@ function renderMap(window_dims, margin, svg){
 
 			return ({'GEOID':geoId, 'States': d[1][0]['States'], 'Count': sum })
 			})
-console.log(aggregation)
+		console.log(aggregation)
 
 		const mapData = d3.group(aggregation, d=>d.GEOID)
 
 		//console.log(mapData);
-		//console.log(mapData.get("0400000US06")[0].Count);
-
-
-
-
-		//console.log(test_Data.get("0400000US06"));
-		//console.log(test_Data);
-		//console.log([...test_Data]);
-		//console.log(d3.extent([...test_Data], d=>Number(d[1][0].Count)));
-		//console.log(typeof d3.extent([...test_Data], d=>d[1][0].Count)[0]);
+		//console.log(mapData.get("0400000US06")[0].Count)
 
 
 
@@ -203,8 +181,9 @@ console.log(aggregation)
 
 
 		const geoPath_generator = d3.geoPath()
-			.projection(d3.geoAlbers().
-			fitSize([window_dims.width - margin, window_dims.height - margin], geojson))
+			.projection(d3.geoAlbersUsa()
+				.fitSize([window_dims.width - margin, window_dims.height - margin], geojson)
+		)
 
 
 
@@ -243,6 +222,7 @@ console.log(aggregation)
 				}
 			)
 			.attr("fill","white")
+			.attr("stroke", "black")
 			.on("mousemove", (mouseData,d)=>{
 				let state
 				let count
@@ -254,7 +234,7 @@ console.log(aggregation)
 					state = 'No Data Available'
 					count = 'No Data Available'
 				}
-				
+
 				d3.select('#tooltip')
 					.style("opacity",.8)
 					.style("left",(mouseData.clientX+10).toString()+"px")
@@ -266,7 +246,7 @@ console.log(aggregation)
 			})
 			.transition()
 			.delay((_,i)=>i*2)
-			.duration(800)
+			.duration(1800)
 			.style("fill", (d) => {
 				try{
 					// If a state has Data
@@ -275,7 +255,7 @@ console.log(aggregation)
 				catch (error)
 				{
 					// In case a state has no Data
-					return "orange";
+					return "steelblue";
 
 					// Silverblue, steelblue, white
 				}
@@ -286,6 +266,85 @@ console.log(aggregation)
 
 
 	})
+}
+
+
+function renderTimeSeries(){
+
+	const Cancer_Data = "../Data/Cancer_Data.csv"
+	d3.csv(Cancer_Data).then(
+		data => {
+			// Filter and group CSV cancer_data
+			let filteredData = d3.group((data.filter(d=> {
+					if(ageGroupSelected.includes(d.Age_Groups)){
+						return true
+					}
+					else if(ageGroupSelected.includes("All")){
+						return true
+					}
+				})
+				.filter(d=> {
+					if(cancerTypesSelected.includes(d.Cancer_Sites)){
+						return true
+					}
+					else if(cancerTypesSelected.includes("All")){
+						return true
+					}
+				})), d=>d.GEOID, d=>d.Year);
+
+			console.log((filteredData));
+			console.log([...filteredData]);
+
+			// Aggregate data based on year, and group by geoid
+			 [...filteredData].slice(-1).forEach(d=>{
+				console.log([...d[1]]);
+
+				const geoId = d[0];
+
+				const temp = [...d[1]].map(dd=>{
+					let sum = 0;
+					const year = dd[0];
+
+					dd[1].forEach(ddd =>
+					{
+						sum = sum + Number(ddd['Count'])
+					})
+
+
+
+					return ({'GEOID':geoId, 'States': d[1][0]['States'], 'Count': sum , 'Year': year});
+				})
+			})
+
+			const aggregatedData = [...filteredData].map(d=>
+			{
+				let sum = 0;
+				const geoId = d[0];
+
+				d[1].forEach(dd =>
+				{
+					sum = sum + Number(dd['Count'])
+				})
+
+				//console.log(sum)
+
+				return ({'GEOID':geoId, 'States': d[1][0]['States'], 'Count': sum })
+			})
+
+
+
+
+
+
+			//console.log(aggregatedData)
+
+			const timeSeriesData = d3.group(aggregatedData, d=>d.GEOID);
+
+			//console.log(timeSeriesData);
+
+
+		}
+	)
 }
 
 
